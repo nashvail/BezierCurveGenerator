@@ -34,10 +34,9 @@ class Point {
 	constructor(x, y) {
 		this.x = x;
 		/*
-			Because we're flipping the axis, 
-			the reason to the following is because we 
+			The reason to the following is because we 
 			want the origin to be at bottom left corner 
-			instead of top left.	
+			instead of the top left.	
 		*/
 		this.y = PLOT_HEIGHT - y;
 	}
@@ -73,18 +72,20 @@ class CubicBezier {
 
 	calculateDrawingPoints() {
 		let interval = 1 / this.numDrawingPoints;
-		let startingPoint = interval;
+		let t = interval;
 
 		this.drawingPoints.push(this.calculateNewPoint(0));
 
 		for( let i = 0; i < this.numDrawingPoints; i++ ) {
-			this.drawingPoints.push(this.calculateNewPoint(startingPoint));
-			startingPoint += interval;
+			this.drawingPoints.push(this.calculateNewPoint(t));
+			t += interval;
 		}
 
 	}
 
 	calculateNewPoint(t) {
+		// Coordinates calculated using the general formula are relative to 
+		// origin at bottom left.
 		let x = (
 			(Math.pow( (1 - t), 3) * this.p0.x) + 
 			(3 * Math.pow( (1 - t), 2) * t * this.p1.x) +
