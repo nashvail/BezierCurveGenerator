@@ -2,11 +2,13 @@
 
 const PLOT_HEIGHT = 500;
 
+let ab = null;
+
 window.addEventListener('load', () => {
 	let graph = new Graph("graph");
 
 	// The cubic Bezier will take 4 points 
-	let p0 = new Point(100, 50);
+/*	let p0 = new Point(100, 50);
 	let p1 = new Point(150, 250);
 	let p2 = new Point(200, 250);
 	let p3 = new Point(300, 50); 
@@ -16,9 +18,19 @@ window.addEventListener('load', () => {
 	p1.mark();
 	p2.mark();
 	p3.mark();
+
 	drawHandles();
 
-	graph.drawCurveFromPoints(cb.drawingPoints);
+	graph.drawCurveFromPoints(cb.drawingPoints);*/
+
+	ab = new AnyBezier([
+		new Point(100, 50),
+		new Point(150, 250),
+		new Point(200, 250),
+		new Point(300, 50)
+	]);
+
+	graph.drawCurveFromPoints(ab.drawingPoints);
 
 
 	// Utilty functions
@@ -104,6 +116,47 @@ class CubicBezier {
 	}
 }
 
+class AnyBezier {
+
+	constructor(p) {
+
+		this.p = p;
+
+		this.numDrawingPoints = 100;
+		this.drawingPoints = [];
+
+		this.calculateDrawingPoints();
+	}
+
+	calculateDrawingPoints() {
+		let interval = 1 / this.numDrawingPoints;
+		let t = interval;
+
+		this.drawingPoints.push(this.calculateNewPoint(0));
+
+		for( let i = 0; i < this.numDrawingPoints; i++ ) {
+			this.drawingPoints.push(this.calculateNewPoint(t));
+			t += interval;
+		}
+
+	}
+
+	calculateNewPoint(t) {
+		// Coordinates calculated using the general formula are relative to 
+		// origin at bottom left.
+		let x = 0;
+		let y = 0;
+		let bin = 0;
+		for (let i = 0; i < this.p.length; i++) {
+			bin = binomial(this.p.length, i) * Math.pow((1-t), (this.p.length-i)) * Math.pow(t, i);
+			x += bin * this.p[i].x;
+			y += bin * this.p[i].y;
+		}
+
+		return (new Point(x, PLOT_HEIGHT - y));
+	}
+}
+
 class Graph {
 
 	constructor(id) {
@@ -123,4 +176,12 @@ class Graph {
 }
 
 
-
+function binomial(n, k) {
+	if ((typeof n !== 'number') || (typeof k !== 'number')) {
+		return false;
+	}
+	var coeff = 1;
+	for (var x = n-k+1; x <= n; x++) coeff *= x;
+	for (x = 1; x <= k; x++) coeff /= x;
+	return coeff;
+}
