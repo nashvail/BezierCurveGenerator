@@ -20,12 +20,6 @@ window.addEventListener('load', () => {
 
 	ab = new AnyBezier([
 		new Point(10, 10),
-		new Point(60, 210),
-		new Point(110, 210),
-		new Point(210, 10),
-		new Point(250, 50),
-		new Point(300, 490),
-		new Point(400, 80)
 	]);
 
 	drawHandles(ab);
@@ -43,12 +37,20 @@ window.addEventListener('load', () => {
 			graph.drawLine(b.p0, b.p1, 1, '#00FF00');
 			graph.drawLine(b.p2, b.p3, 1, '#00FF00');
 		} else if (b instanceof AnyBezier) {
+			if (b.p.length === 1) {
+				b.p[0].mark();
+				return;
+			}
 			for (let i = 1; i < b.p.length; i++) {
 				if (i == 1 || i == b.p.length-1) {
 					b.p[i-1].mark();
 					b.p[i].mark();
 				}
 				graph.drawLine(b.p[i-1], b.p[i], 1, (i==1||i==b.p.length-1)?'#00FF00':'#AA4444');
+			}
+			if (b.p.length === 1) {
+				b.p[0].mark();
+				return;
 			}
 		}
 	}
