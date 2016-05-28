@@ -20,6 +20,12 @@ window.addEventListener('load', () => {
 
 	ab = new AnyBezier([
 		new Point(10, 10),
+		new Point(60, 210),
+		new Point(110, 210),
+		new Point(210, 10),
+		new Point(250, 50),
+		new Point(300, 490),
+		new Point(400, 80)
 	]);
 
 	drawHandles(ab);
