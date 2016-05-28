@@ -7,36 +7,50 @@ let ab = null;
 window.addEventListener('load', () => {
 	let graph = new Graph("graph");
 
-	// The cubic Bezier will take 4 points 
-/*	let p0 = new Point(100, 50);
-	let p1 = new Point(150, 250);
-	let p2 = new Point(200, 250);
-	let p3 = new Point(300, 50); 
+	// The cubic Bezier will take 4 points
+	let p0 = new Point(50, 250);
+	let p1 = new Point(100, 450);
+	let p2 = new Point(150, 450);
+	let p3 = new Point(250, 250); 
 	let cb = new CubicBezier(p0, p1, p2, p3);
 
-	p0.mark();
-	p1.mark();
-	p2.mark();
-	p3.mark();
+	drawHandles(cb);
 
-	drawHandles();
-
-	graph.drawCurveFromPoints(cb.drawingPoints);*/
+	graph.drawCurveFromPoints(cb.drawingPoints);
 
 	ab = new AnyBezier([
-		new Point(100, 50),
-		new Point(150, 250),
-		new Point(200, 250),
-		new Point(300, 50)
+		new Point(10, 10),
+		new Point(60, 210),
+		new Point(110, 210),
+		new Point(210, 10),
+		new Point(250, 50),
+		new Point(300, 490),
+		new Point(400, 80)
 	]);
+
+	drawHandles(ab);
 
 	graph.drawCurveFromPoints(ab.drawingPoints);
 
 
 	// Utilty functions
-	function drawHandles() {
-		graph.drawLine(p0, p1, 1, '#00FF00');
-		graph.drawLine(p2, p3, 1, '#00FF00');
+	function drawHandles(b) {
+		if (b instanceof CubicBezier) {
+			b.p0.mark();
+			b.p1.mark();
+			b.p2.mark();
+			b.p3.mark();
+			graph.drawLine(b.p0, b.p1, 1, '#00FF00');
+			graph.drawLine(b.p2, b.p3, 1, '#00FF00');
+		} else if (b instanceof AnyBezier) {
+			for (let i = 1; i < b.p.length; i++) {
+				if (i == 1 || i == b.p.length-1) {
+					b.p[i-1].mark();
+					b.p[i].mark();
+				}
+				graph.drawLine(b.p[i-1], b.p[i], 1, (i==1||i==b.p.length-1)?'#00FF00':'#AA4444');
+			}
+		}
 	}
 });
 
@@ -146,9 +160,10 @@ class AnyBezier {
 		// origin at bottom left.
 		let x = 0;
 		let y = 0;
+		let n = this.p.length - 1;
 		let bin = 0;
-		for (let i = 0; i < this.p.length; i++) {
-			bin = binomial(this.p.length, i) * Math.pow((1-t), (this.p.length-i)) * Math.pow(t, i);
+		for (let i = 0; i <= n; i++) {
+			bin = binomial(n, i) * Math.pow((1-t), (n-i)) * Math.pow(t, i);
 			x += bin * this.p[i].x;
 			y += bin * this.p[i].y;
 		}
