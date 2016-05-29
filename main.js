@@ -142,7 +142,18 @@ class AnyBezier {
 
 	constructor(p) {
 
-		this.p = p;
+		if ( p instanceof Point ) {
+			this.p = [];
+			for ( let i = 0; i < arguments.length; i++ ) {
+				if ( arguments[i] instanceof Point ) {
+					this.p.push(arguments[i]);
+				}
+			}
+		} else if ( typeof p === 'object' ) {
+			this.p = p;
+		} else {
+			this.p = [];
+		}
 
 		this.numDrawingPoints = 100;
 		this.drawingPoints = [];
@@ -169,9 +180,8 @@ class AnyBezier {
 		let x = 0;
 		let y = 0;
 		let n = this.p.length - 1;
-		let bin = 0;
-		for (let i = 0; i <= n; i++) {
-			bin = binomial(n, i) * Math.pow((1-t), (n-i)) * Math.pow(t, i);
+		for ( let i = 0; i <= n; i++ ) {
+			let bin = binomial(n, i) * Math.pow((1-t), (n-i)) * Math.pow(t, i);
 			x += bin * this.p[i].x;
 			y += bin * this.p[i].y;
 		}
@@ -200,11 +210,11 @@ class Graph {
 
 
 function binomial(n, k) {
-	if ((typeof n !== 'number') || (typeof k !== 'number')) {
+	if ( (typeof n !== 'number') || (typeof k !== 'number') ) {
 		return false;
 	}
 	var coeff = 1;
-	for (var x = n-k+1; x <= n; x++) coeff *= x;
-	for (x = 1; x <= k; x++) coeff /= x;
+	for ( var x = n-k+1; x <= n; x++ ) coeff *= x;
+	for ( x = 1; x <= k; x++ ) coeff /= x;
 	return coeff;
 }
