@@ -3,67 +3,36 @@
 const PLOT_HEIGHT = 500;
 
 window.addEventListener('load', () => {
+
 	let graph = new Graph("graph");
 
-	// The cubic Bezier will take 4 points
-	let p0 = new Point(50, 250);
-	let p1 = new Point(100, 450);
-	let p2 = new Point(150, 450);
-	let p3 = new Point(250, 250); 
-	let cb = new CubicBezier(p0, p1, p2, p3);
 
-	drawHandles(cb);
-
-	graph.drawCurveFromPoints(cb.drawingPoints);
-
-	let ab = new AnyBezier([
+	let bezierCurve = new BezierCurve([
 		new Point(10, 10),
-		new Point(60, 210),
-		new Point(110, 210),
+		new Point(70, 310),
+		new Point(210, 210),
 		new Point(210, 10),
-		new Point(250, 50),
-		new Point(300, 490),
-		new Point(400, 80)
+		// new Point(350, 50),
+		// new Point(200, 290),
+		// new Point(400, 80),
+		// new Point(420, 100)
 	]);
 
-	drawHandles(ab);
+	drawHandles(graph, bezierCurve);
+	graph.drawCurveFromPoints(bezierCurve.drawingPoints);
 
-	graph.drawCurveFromPoints(ab.drawingPoints);
-
-
-	// Utilty functions
-	function drawHandles(b) {
-		if (b instanceof CubicBezier) {
-			b.p0.mark();
-			b.p1.mark();
-			b.p2.mark();
-			b.p3.mark();
-			graph.drawLine(b.p0, b.p1, 1, '#00FF00');
-			graph.drawLine(b.p2, b.p3, 1, '#00FF00');
-		} else if (b instanceof AnyBezier) {
-			if (b.p.length === 1) {
-				b.p[0].mark();
-				return;
-			}
-			for (let i = 1; i < b.p.length; i++) {
-				if (i == 1 || i == b.p.length-1) {
-					b.p[i-1].mark();
-					b.p[i].mark();
-				}
-				graph.drawLine(b.p[i-1], b.p[i], 1, (i==1||i==b.p.length-1)?'#00FF00':'#AA4444');
-			}
-			if (b.p.length === 1) {
-				b.p[0].mark();
-				return;
-			}
-		}
-	}
 });
 
 
+/*
+* Class : Point( x coordinate, y coordinate )
+* -------------------------------------------
+* Represents a single point on the plot.
+*/
+
 class Point {
 
-	constructor(x, y) {
+	constructor(x = 0, y = 0) {
 		this.x = x;
 		/*
 			The reason to the following is because we 
@@ -87,72 +56,32 @@ class Point {
 
 }
 
-class CubicBezier {
+/*
+* Class : BezierCurve( Collection of n points for a curve of degree n)
+* ------------------------------------------------------------------
+* Represents a Bezier curve, the number of points passed in the con-
+* structor determine the degree of the curve.
+*/
 
-	constructor(p0, p1, p2, p3) {
+class BezierCurve {
 
-		this.p0 = p0;
-		this.p1 = p1;
-		this.p2 = p2;
-		this.p3 = p3;
+	constructor(points) {
 
-		this.numDrawingPoints = 100;
-		this.drawingPoints = [];
-
-		this.calculateDrawingPoints();
-	}
-
-	calculateDrawingPoints() {
-		let interval = 1 / this.numDrawingPoints;
-		let t = interval;
-
-		this.drawingPoints.push(this.calculateNewPoint(0));
-
-		for( let i = 0; i < this.numDrawingPoints; i++ ) {
-			this.drawingPoints.push(this.calculateNewPoint(t));
-			t += interval;
-		}
-
-	}
-
-	calculateNewPoint(t) {
-		// Coordinates calculated using the general formula are relative to 
-		// origin at bottom left.
-		let x = (
-			(Math.pow( (1 - t), 3) * this.p0.x) + 
-			(3 * Math.pow( (1 - t), 2) * t * this.p1.x) +
-			(3 * (1 - t) * Math.pow(t, 2) * this.p2.x) +
-			(Math.pow(t, 3) * this.p3.x)
-		);
-
-		let y = (
-			(Math.pow( (1 - t), 3) * this.p0.y) + 
-			(3 * Math.pow( (1 - t), 2) * t * this.p1.y) +
-			(3 * (1 - t) * Math.pow(t, 2) * this.p2.y) +
-			(Math.pow(t, 3) * this.p3.y)
-		);
-
-		return (new Point(x, PLOT_HEIGHT - y));
-	}
-}
-
-class AnyBezier {
-
-	constructor(p) {
-
-		if ( p instanceof Point ) {
-			this.p = [];
+		if ( points instanceof Point ) {
+			this.points = [];
 			for ( let i = 0; i < arguments.length; i++ ) {
 				if ( arguments[i] instanceof Point ) {
-					this.p.push(arguments[i]);
+					this.points.push(arguments[i]);
 				}
 			}
-		} else if ( typeof p === 'object' ) {
-			this.p = p;
+		} else if ( typeof points === 'object' ) {
+			this.points = points;
 		} else {
-			this.p = [];
+			this.points = [];
 		}
 
+		// Drawing points are the number of points that render the curve, 
+		// the more the number of drawing points, smoother the curve.
 		this.numDrawingPoints = 100;
 		this.drawingPoints = [];
 
@@ -177,17 +106,23 @@ class AnyBezier {
 		// origin at bottom left.
 		let x = 0;
 		let y = 0;
-		let n = this.p.length - 1;
+		let n = this.points.length - 1;
 		for ( let i = 0; i <= n; i++ ) {
-			let bin = binomial(n, i) * Math.pow((1-t), (n-i)) * Math.pow(t, i);
-			x += bin * this.p[i].x;
-			y += bin * this.p[i].y;
+			let bin = C(n, i) * Math.pow((1-t), (n-i)) * Math.pow(t, i);
+			x += bin * this.points[i].x;
+			y += bin * this.points[i].y;
 		}
 
 		return (new Point(x, PLOT_HEIGHT - y));
 	}
 }
 
+/*
+* Class : Graph(id of the svg container)
+* -------------------------------------------
+* Represents a graph and exports methods for 
+* drawing lines and curves.
+*/
 class Graph {
 
 	constructor(id) {
@@ -207,7 +142,27 @@ class Graph {
 }
 
 
-function binomial(n, k) {
+// Utilty functions
+
+function drawHandles(graph, curve) {
+	if (curve.points.length === 1) {
+		curve.points[0].mark();
+		return;
+	}
+	for (let i = 1; i < curve.points.length; i++) {
+		if (i == 1 || i == curve.points.length-1) {
+			curve.points[i-1].mark();
+			curve.points[i].mark();
+		}
+		graph.drawLine(curve.points[i-1], curve.points[i], 1, (i==1||i==curve.points.length-1)?'#00FF00':'#AA4444');
+	}
+	if (curve.points.length === 1) {
+		curve.points[0].mark();
+		return;
+	}
+}
+
+function C(n, k) {
 	if ( (typeof n !== 'number') || (typeof k !== 'number') ) {
 		return false;
 	}
