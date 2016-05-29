@@ -2,8 +2,6 @@
 
 const PLOT_HEIGHT = 500;
 
-let ab = null;
-
 window.addEventListener('load', () => {
 	let graph = new Graph("graph");
 
@@ -18,7 +16,7 @@ window.addEventListener('load', () => {
 
 	graph.drawCurveFromPoints(cb.drawingPoints);
 
-	ab = new AnyBezier([
+	let ab = new AnyBezier([
 		new Point(10, 10),
 		new Point(60, 210),
 		new Point(110, 210),
